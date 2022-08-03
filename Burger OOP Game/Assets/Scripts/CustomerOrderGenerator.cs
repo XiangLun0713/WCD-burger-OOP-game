@@ -8,7 +8,9 @@ using Random = UnityEngine.Random;
 public class CustomerOrderGenerator : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI customerOrderDisplayText;
-    [SerializeField] private TextMeshProUGUI testingText;
+    [SerializeField] private TextMeshProUGUI recipeText;
+    [SerializeField] private int profitPerCorrect = 20;
+    [SerializeField] private int penaltyPerWrong = 20;
 
     private HashSet<MakeBurger.BurgerContent> _answerSet;
     private Recipe _recipe;
@@ -21,8 +23,7 @@ public class CustomerOrderGenerator : MonoBehaviour
 
     public void CreateRecipeOfTheDay()
     {
-        // randomly pick between recipe 1 and recipe 2
-        if (Random.Range(0, 2) == 0)
+        if (MainMenuManager.IsStoryMode)
         {
             _recipe = new Recipe1();
         }
@@ -31,7 +32,7 @@ public class CustomerOrderGenerator : MonoBehaviour
             _recipe = new Recipe2();
         }
 
-        testingText.text = _recipe.GetRecipe();
+        recipeText.text = _recipe.GetRecipe();
     }
 
     public void GenerateCustomerOrder()
@@ -39,11 +40,13 @@ public class CustomerOrderGenerator : MonoBehaviour
         customerOrderDisplayText.text = _recipe.GenerateCustomerOrder(out _answerSet);
     }
 
-    public float CheckResult()
+    public int CheckResult(HashSet<MakeBurger.BurgerContent> burgerContents)
     {
-        // todo use the answerSet to determine & return the profit
-        float money = 0f;
-        return money;
+        // use the answerSet to determine & return the profit
+        _answerSet.IntersectWith(burgerContents);
+        int totalNumOfInputContents = burgerContents.Count;
+        int correctCount = _answerSet.Count;
+        return (correctCount * profitPerCorrect) - ((totalNumOfInputContents - correctCount) * penaltyPerWrong);
     }
 }
 

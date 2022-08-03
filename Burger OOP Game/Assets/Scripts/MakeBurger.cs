@@ -32,14 +32,15 @@ public class MakeBurger : MonoBehaviour
         MustardSauce,
     }
 
-    [SerializeField] private GameObject trayWithBunPrefab;
-    [SerializeField] private GameObject topBunPrefab;
+    [SerializeField] private float offsetY = .5f;
     [SerializeField] private float moveDist = 4.45f;
+    [SerializeField] private GameObject topBunPrefab;
+    [SerializeField] private GameObject trayWithBunPrefab;
     [SerializeField] private GameManager gameManager;
+    [SerializeField] private CustomerOrderGenerator customerOrderGenerator;
     [SerializeField] private Button doneButton;
     [SerializeField] private Button leftButton;
     [SerializeField] private Button rightButton;
-    [SerializeField] private float offsetY = .5f;
     [SerializeField] private Button[] itemButtons;
     [SerializeField] private Sprite[] pattyOptions;
     [SerializeField] private Sprite[] toppingOptions;
@@ -66,13 +67,18 @@ public class MakeBurger : MonoBehaviour
     {
         if (gameManager.IsGameOver)
         {
-            doneButton.interactable = false;
-            leftButton.interactable = false;
-            rightButton.interactable = false;
-            foreach (Button button in itemButtons)
-            {
-                button.interactable = false;
-            }
+            SetAllButtonsInteractable(false);
+        }
+    }
+
+    public void SetAllButtonsInteractable(bool interactable)
+    {
+        doneButton.interactable = interactable;
+        leftButton.interactable = interactable;
+        rightButton.interactable = interactable;
+        foreach (Button button in itemButtons)
+        {
+            button.interactable = interactable;
         }
     }
 
@@ -81,6 +87,15 @@ public class MakeBurger : MonoBehaviour
         _currentBurger = Instantiate(trayWithBunPrefab, transform.position, transform.rotation);
         GameState = State.Spawn;
         MoveTrayToRight();
+    }
+
+    public void RemoveTray()
+    {
+        if (_currentBurger == null) return;
+        // remove tray
+        Destroy(_currentBurger);
+        // clear burger content
+        _burgerContents.Clear();
     }
 
     private void MoveTrayToLeft()
@@ -348,9 +363,13 @@ public class MakeBurger : MonoBehaviour
     {
         // disable done button
         doneButton.interactable = false;
-        // TODO check for the burger content & earnings
+        // check burger content & update money earned
+        int earn = customerOrderGenerator.CheckResult(_burgerContents);
+        gameManager.IncreaseMoneyEarned(earn);
         // play destroy animation
         StartCoroutine(DestroyAnim());
+        // generate new customer order
+        customerOrderGenerator.GenerateCustomerOrder();
         // spawn a new tray
         CreateTray();
     }
