@@ -43,6 +43,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button readyButton;
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private Animator transitionAnimation;
+    [SerializeField] private ParticleSystem confetti;
 
     public TextMeshProUGUI dayText;
     public TextMeshProUGUI moneyText;
@@ -55,7 +56,7 @@ public class GameManager : MonoBehaviour
     private int TargetForTheDay { get; set; }
     private int TotalMoneyEarned { get; set; }
 
-    private const int GameDurationInSec = 60;
+    private const int GameDurationInSec = 150;
     private const int InitialTargetForTheDayVal = 300;
     private const int IncreaseInTargetValPerDay = 250;
     private float _timerTime;
@@ -207,6 +208,7 @@ public class GameManager : MonoBehaviour
                     : $"第{DayPassed}天·成功！";
 
                 winSound.Play();
+                confetti.Play();
             }
             else
             {
