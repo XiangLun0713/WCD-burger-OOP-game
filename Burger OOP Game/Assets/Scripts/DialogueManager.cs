@@ -21,6 +21,8 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private Image dialogueBox;
     [SerializeField] private AudioSource typingSound;
     [SerializeField] private AudioSource popSound;
+    [SerializeField] private Animator transitionAnimation;
+    [SerializeField] private Button skipButton;
 
     private const float EnglishTypingSpeed = .03f;
     private const float ChineseTypingSpeed = .08f;
@@ -31,6 +33,8 @@ public class DialogueManager : MonoBehaviour
 
     private void Start()
     {
+        transitionAnimation.Play("Transition_Out");
+
         InGameLanguage = MainMenuManager.InGameLanguage;
 
         dialogueBox.gameObject.SetActive(false);
@@ -131,34 +135,44 @@ public class DialogueManager : MonoBehaviour
     {
         LoadStartDialogue();
         dialogueBox.gameObject.SetActive(true);
+        skipButton.gameObject.SetActive(true);
         StartCoroutine(TypeOneDialogue());
     }
 
     private void ShowEndDialogue()
     {
         LoadEndDialogue();
+        skipButton.gameObject.SetActive(true);
         dialogueBox.gameObject.SetActive(true);
         StartCoroutine(TypeOneDialogue());
     }
 
     private IEnumerator ProceedNextLine()
     {
+        continueButton.SetActive(false);
+
         popSound.Play();
         yield return new WaitWhile(() => popSound.isPlaying);
 
         dialogueText.gameObject.SetActive(false);
-        continueButton.SetActive(false);
 
         if (_dialogueQueue.Count <= 0)
         {
             // all story displayed
-            dialogueBox.gameObject.SetActive(false);
-            SceneManager.LoadScene(DialogueState == StoryState.Start ? "Scenes/Game Scene" : "Scenes/Main Menu");
+            StartCoroutine(SwitchScene());
         }
         else
         {
             StartCoroutine(TypeOneDialogue());
         }
+    }
+
+    private IEnumerator SwitchScene()
+    {
+        dialogueBox.gameObject.SetActive(false);
+        transitionAnimation.Play("Transition_In");
+        yield return new WaitForSeconds(40.0f / 60);
+        SceneManager.LoadScene(DialogueState == StoryState.Start ? "Scenes/Game Scene" : "Scenes/Main Menu");
     }
 
     public void OnContinueButtonPressed()
@@ -168,6 +182,7 @@ public class DialogueManager : MonoBehaviour
 
     public void OnSkipButtonPressed()
     {
+        skipButton.gameObject.SetActive(false);
         StartCoroutine(SkipStory());
     }
 
@@ -175,7 +190,8 @@ public class DialogueManager : MonoBehaviour
     {
         popSound.Play();
         yield return new WaitWhile(() => popSound.isPlaying);
-
+        transitionAnimation.Play("Transition_In");
+        yield return new WaitForSeconds(40.0f / 60);
         SceneManager.LoadScene(DialogueState == StoryState.Start ? "Scenes/Game Scene" : "Scenes/Main Menu");
     }
 }

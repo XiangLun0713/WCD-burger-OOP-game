@@ -9,12 +9,14 @@ using UnityEngine.UI;
 public class MainMenuManager : MonoBehaviour
 {
     [SerializeField] private AudioSource popSound;
+    [SerializeField] private AudioSource backgroundMusic;
     [SerializeField] private Button ChinaButton;
     [SerializeField] private TextMeshProUGUI ChinaButtonText;
     [SerializeField] private Button UKButton;
     [SerializeField] private TextMeshProUGUI UKButtonText;
     [SerializeField] private TextMeshProUGUI storyModeText;
     [SerializeField] private TextMeshProUGUI endlessModeText;
+    [SerializeField] private Animator transitionAnimation;
 
     public static GameManager.Language InGameLanguage { get; private set; }
     public static bool IsStoryMode { get; private set; }
@@ -23,6 +25,8 @@ public class MainMenuManager : MonoBehaviour
 
     private void Start()
     {
+        if (GameManager.PlayedOneTime) transitionAnimation.Play("Transition_Out");
+
         InGameLanguage = GameManager.InGameLanguage;
         _chinaImage = ChinaButton.GetComponent<Image>();
         _ukImage = UKButton.GetComponent<Image>();
@@ -41,15 +45,40 @@ public class MainMenuManager : MonoBehaviour
 
     public void PlayStoryMode()
     {
+        StartCoroutine(DecreaseBackgroundMusicVolume());
+        StartCoroutine(PlayStoryModeCoroutine());
+    }
+
+    private IEnumerator PlayStoryModeCoroutine()
+    {
         IsStoryMode = true;
+        transitionAnimation.Play("Transition_In");
+        yield return new WaitForSeconds(40.0f / 60);
         DialogueManager.DialogueState = DialogueManager.StoryState.Start;
         SceneManager.LoadScene("Scenes/Story Scene");
     }
 
     public void PlayEndlessMode()
     {
+        StartCoroutine(DecreaseBackgroundMusicVolume());
+        StartCoroutine(PlayEndlessModeCoroutine());
+    }
+
+    private IEnumerator PlayEndlessModeCoroutine()
+    {
         IsStoryMode = false;
+        transitionAnimation.Play("Transition_In");
+        yield return new WaitForSeconds(40.0f / 60);
         SceneManager.LoadScene("Scenes/Game Scene");
+    }
+
+    private IEnumerator DecreaseBackgroundMusicVolume()
+    {
+        for (float i = 1; i >= 0; i -= 0.05f)
+        {
+            backgroundMusic.volume = i;
+            yield return new WaitForSeconds(.02f);
+        }
     }
 
     public void ChangeToEnglish()
