@@ -23,15 +23,7 @@ public class CustomerOrderGenerator : MonoBehaviour
 
     public void CreateRecipeOfTheDay()
     {
-        if (MainMenuManager.IsStoryMode)
-        {
-            _recipe = new Recipe1();
-        }
-        else
-        {
-            _recipe = new Recipe2();
-        }
-
+        _recipe = new Recipe2();
         recipeText.text = _recipe.GetRecipe();
     }
 
@@ -43,10 +35,12 @@ public class CustomerOrderGenerator : MonoBehaviour
     public int CheckResult(HashSet<MakeBurger.BurgerContent> burgerContents)
     {
         // use the answerSet to determine & return the profit
-        _answerSet.IntersectWith(burgerContents);
+        int totalNumOfCorrectContents = _answerSet.Count;
         int totalNumOfInputContents = burgerContents.Count;
+        _answerSet.IntersectWith(burgerContents);
         int correctCount = _answerSet.Count;
-        return (correctCount * profitPerCorrect) - ((totalNumOfInputContents - correctCount) * penaltyPerWrong);
+        return (correctCount * profitPerCorrect) - (((totalNumOfInputContents - correctCount) +
+                                                     (totalNumOfCorrectContents - correctCount)) * penaltyPerWrong);
     }
 }
 
