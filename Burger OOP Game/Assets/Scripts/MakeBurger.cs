@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -41,6 +42,7 @@ public class MakeBurger : MonoBehaviour
     [SerializeField] private Button doneButton;
     [SerializeField] private Button leftButton;
     [SerializeField] private Button rightButton;
+    [SerializeField] private TextMeshProUGUI[] itemLabels;
     [SerializeField] private Button[] itemButtons;
     [SerializeField] private Sprite[] pattyOptions;
     [SerializeField] private Sprite[] toppingOptions;
@@ -171,6 +173,14 @@ public class MakeBurger : MonoBehaviour
                 {
                     itemButtons[i].image.sprite = pattyOptions[i];
 
+                    itemLabels[i].text = i switch
+                    {
+                        0 => "Beef",
+                        1 => "Chicken",
+                        2 => "Fish",
+                        _ => String.Empty
+                    };
+
                     Color temp = itemButtons[i].image.color;
                     if (pattyOptions[i] == null)
                     {
@@ -196,6 +206,16 @@ public class MakeBurger : MonoBehaviour
                 for (int i = 0; i < 5; i++)
                 {
                     itemButtons[i].image.sprite = toppingOptions[i];
+
+                    itemLabels[i].text = i switch
+                    {
+                        0 => "Cheese",
+                        1 => "Cucumber",
+                        2 => "Onion",
+                        3 => "Lettuce",
+                        4 => "Tomato",
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
 
                     Color temp = itemButtons[i].image.color;
                     if (toppingOptions[i] == null)
@@ -224,6 +244,16 @@ public class MakeBurger : MonoBehaviour
                 for (int i = 0; i < 5; i++)
                 {
                     itemButtons[i].image.sprite = sauceOptions[i];
+
+                    itemLabels[i].text = i switch
+                    {
+                        0 => "BBQ",
+                        1 => "Chili",
+                        2 => "Ketchup",
+                        3 => "Mayo",
+                        4 => "Mustard",
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
 
                     Color temp = itemButtons[i].image.color;
                     if (sauceOptions[i] == null)
@@ -259,6 +289,7 @@ public class MakeBurger : MonoBehaviour
                 for (int i = 0; i < 5; i++)
                 {
                     itemButtons[i].image.sprite = null;
+                    itemLabels[i].text = String.Empty;
 
                     Color temp = itemButtons[i].image.color;
                     temp.a = 0f;
