@@ -23,7 +23,7 @@ public class CustomerOrderGenerator : MonoBehaviour
 
     public void CreateRecipeOfTheDay()
     {
-        _recipe = new Recipe2();
+        _recipe = new MainRecipe();
         recipeText.text = _recipe.GetRecipe();
     }
 
@@ -41,6 +41,11 @@ public class CustomerOrderGenerator : MonoBehaviour
         int correctCount = _answerSet.Count;
         return (correctCount * profitPerCorrect) - (((totalNumOfInputContents - correctCount) +
                                                      (totalNumOfCorrectContents - correctCount)) * penaltyPerWrong);
+    }
+
+    public bool CheckContentAdded(MakeBurger.BurgerContent burgerContent)
+    {
+        return _answerSet.Contains(burgerContent);
     }
 }
 
@@ -95,183 +100,14 @@ abstract class Recipe
     }
 }
 
-class Recipe1 : Recipe
-{
-    private readonly string _recipe;
-    private readonly string _defaultPatty;
-    private readonly string _defaultSauce;
-    private readonly string _defaultBooleanValue;
-
-    public Recipe1()
-    {
-        // Generate the recipe with random default values for the fields
-        string[] possibleDefaultValueForBoolean =
-            {"", $" = <color={PinkColorCode}>true</color>", $" = <color={PinkColorCode}>false</color>"};
-
-        _defaultPatty = Patties[Random.Range(0, Patties.Length)];
-        _defaultSauce = Sauces[Random.Range(0, Sauces.Length)];
-        _defaultBooleanValue =
-            possibleDefaultValueForBoolean[Random.Range(0, possibleDefaultValueForBoolean.Length)];
-
-        _recipe =
-            $"<color={PinkColorCode}>class</color> <color={BlueColorCode}>Burger</color> {{\n\t<color={PinkColorCode}>private</color> <color={BlueColorCode}>String</color> pattyType = <color={YellowColorCode}>\"{_defaultPatty}\"</color>;\n\t<color={PinkColorCode}>private</color> <color={BlueColorCode}>String</color> sauceType = <color={YellowColorCode}>\"{_defaultSauce}\"</color>;\n\t<color={PinkColorCode}>private</color> <color={PinkColorCode}>boolean</color> hasLettuce{_defaultBooleanValue};\n\n\t<color={PinkColorCode}>public</color> <color={GreenColorCode}>Burger</color>() {{\n\n\t}}\n\n\t<color={PinkColorCode}>public</color> <color={GreenColorCode}>Burger</color>(<color={BlueColorCode}>String</color> <color={OrangeColorCode}>pattyType</color>, <color={BlueColorCode}>String</color> <color={OrangeColorCode}>sauceType</color>, <color={PinkColorCode}>boolean</color> <color={OrangeColorCode}>hasLettuce</color>) {{\n\t\t<color={PinkColorCode}>this</color>.pattyType = <color={OrangeColorCode}>pattyType</color>;\n\t\t<color={PinkColorCode}>this</color>.sauceType = <color={OrangeColorCode}>sauceType</color>;\n\t\t<color={PinkColorCode}>this</color>.hasLettuce = <color={OrangeColorCode}>hasLettuce</color>;\n\t}}\n\n\t<color={PinkColorCode}>public</color> <color={PinkColorCode}>void</color> <color={GreenColorCode}>setPattyType</color>(<color={BlueColorCode}>String</color> <color={OrangeColorCode}>pattyType</color>) {{\n\t\t<color={PinkColorCode}>this</color>.pattyType = <color={OrangeColorCode}>pattyType</color>;\n\t}}\n\n\t<color={PinkColorCode}>public</color> <color={PinkColorCode}>void</color> <color={GreenColorCode}>setSauceType</color>(<color={BlueColorCode}>String</color> <color={OrangeColorCode}>sauceType</color>) {{\n\t\t<color={PinkColorCode}>this</color>.sauceType = <color={OrangeColorCode}>sauceType</color>;\n\t}}\n}}";
-    }
-
-
-    public override string GetRecipe()
-    {
-        return _recipe;
-    }
-
-    public override string GenerateCustomerOrder(out HashSet<MakeBurger.BurgerContent> answerSet)
-    {
-        StringBuilder stringBuilder = new StringBuilder();
-        HashSet<MakeBurger.BurgerContent> set = new HashSet<MakeBurger.BurgerContent>();
-
-        // determine whether need to add salad based on the default boolean value
-        if (_defaultBooleanValue.Equals($" = <color={PinkColorCode}>true</color>"))
-        {
-            set.Add(MakeBurger.BurgerContent.Salad);
-        }
-
-        // randomly pick constructor used
-        int rand = Random.Range(0, 3);
-        switch (rand)
-        {
-            case 0:
-            {
-                stringBuilder.Append(
-                    $"<color={BlueColorCode}>Burger</color> burger = " +
-                    $"<color={PinkColorCode}>new</color> <color={GreenColorCode}>Burger</color>();\n");
-
-                set.Add(MapStringToBurgerContent(_defaultPatty));
-                set.Add(MapStringToBurgerContent(_defaultSauce));
-
-                break;
-            }
-            case 1:
-            {
-                string patty = Patties[Random.Range(0, Patties.Length)];
-                string sauce = Sauces[Random.Range(0, Sauces.Length)];
-
-                stringBuilder.Append(
-                    $"<color={BlueColorCode}>Burger</color> burger = " +
-                    $"<color={PinkColorCode}>new</color> <color={GreenColorCode}>Burger</color>" +
-                    $"(<color={YellowColorCode}>\"{patty}\"</color>, <color={YellowColorCode}>\"{sauce}\"</color>, " +
-                    $"<color={PinkColorCode}>true</color>);\n");
-
-                set.Add(MapStringToBurgerContent(patty));
-                set.Add(MapStringToBurgerContent(sauce));
-                set.Add(MakeBurger.BurgerContent.Salad);
-
-                break;
-            }
-            case 2:
-            {
-                string patty = Patties[Random.Range(0, Patties.Length)];
-                string sauce = Sauces[Random.Range(0, Sauces.Length)];
-
-                stringBuilder.Append(
-                    $"<color={BlueColorCode}>Burger</color> burger = " +
-                    $"<color={PinkColorCode}>new</color> <color={GreenColorCode}>Burger</color>" +
-                    $"(<color={YellowColorCode}>\"{patty}\"</color>, <color={YellowColorCode}>\"{sauce}\"</color>, " +
-                    $"<color={PinkColorCode}>false</color>);\n");
-
-                set.Add(MapStringToBurgerContent(patty));
-                set.Add(MapStringToBurgerContent(sauce));
-                set.Remove(MakeBurger.BurgerContent.Salad);
-
-                break;
-            }
-        }
-
-        // randomly pick add-on setters used
-        rand = Random.Range(0, 4);
-        switch (rand)
-        {
-            case 0:
-            {
-                // do nothing
-                break;
-            }
-            case 1:
-            {
-                // add patty type setter
-                string patty = Patties[Random.Range(0, Patties.Length)];
-
-                stringBuilder.Append(
-                    $"burger.<color={GreenColorCode}>setPattyType</color>(<color={YellowColorCode}>\"{patty}\"</color>);\n");
-
-                // update the patty used
-                RemoveAllPattiesFromSet(set);
-                set.Add(MapStringToBurgerContent(patty));
-
-                break;
-            }
-            case 2:
-            {
-                // add sauce type setter
-                string sauce = Sauces[Random.Range(0, Sauces.Length)];
-
-                stringBuilder.Append(
-                    $"burger.<color={GreenColorCode}>setSauceType</color>(<color={YellowColorCode}>\"{sauce}\"</color>);\n");
-
-                // update the sauce used
-                RemoveAllSaucesFromSet(set);
-                set.Add(MapStringToBurgerContent(sauce));
-
-                break;
-            }
-            case 3:
-            {
-                // add patty and sauce type setters
-                string patty = Patties[Random.Range(0, Patties.Length)];
-                string sauce = Sauces[Random.Range(0, Sauces.Length)];
-
-                stringBuilder.Append(
-                    $"burger.<color={GreenColorCode}>setPattyType</color>(<color={YellowColorCode}>\"{patty}\"</color>);\n");
-                stringBuilder.Append(
-                    $"burger.<color={GreenColorCode}>setSauceType</color>(<color={YellowColorCode}>\"{sauce}\"</color>);\n");
-
-                // update the patty and sauce used
-                RemoveAllPattiesFromSet(set);
-                set.Add(MapStringToBurgerContent(patty));
-                RemoveAllSaucesFromSet(set);
-                set.Add(MapStringToBurgerContent(sauce));
-
-                break;
-            }
-        }
-
-        answerSet = set;
-        return stringBuilder.ToString();
-    }
-
-    private void RemoveAllPattiesFromSet(HashSet<MakeBurger.BurgerContent> hashSet)
-    {
-        hashSet.Remove(MakeBurger.BurgerContent.BeefPatty);
-        hashSet.Remove(MakeBurger.BurgerContent.ChickenPatty);
-        hashSet.Remove(MakeBurger.BurgerContent.FishPatty);
-    }
-
-    private void RemoveAllSaucesFromSet(HashSet<MakeBurger.BurgerContent> hashSet)
-    {
-        hashSet.Remove(MakeBurger.BurgerContent.BbqSauce);
-        hashSet.Remove(MakeBurger.BurgerContent.ChiliSauce);
-        hashSet.Remove(MakeBurger.BurgerContent.KetchupSauce);
-        hashSet.Remove(MakeBurger.BurgerContent.MayoSauce);
-        hashSet.Remove(MakeBurger.BurgerContent.MustardSauce);
-    }
-}
-
-class Recipe2 : Recipe
+class MainRecipe : Recipe
 {
     private readonly string _recipe;
     private readonly HashSet<string> _defaultPatties;
     private readonly HashSet<string> _defaultToppings;
     private readonly string _defaultSauce;
 
-    public Recipe2()
+    public MainRecipe()
     {
         string defaultPattiesText = GeneratePattyArrayContent(out _defaultPatties);
         string defaultToppingsText = GenerateToppingArrayContent(out _defaultToppings);

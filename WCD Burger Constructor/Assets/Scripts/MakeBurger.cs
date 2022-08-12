@@ -301,6 +301,18 @@ public class MakeBurger : MonoBehaviour
         }
     }
 
+    private void PlayItemButtonClickSound(bool isCorrect)
+    {
+        if (isCorrect)
+        {
+            gameManager.PlayPopSound();
+        }
+        else
+        {
+            gameManager.PlayWrongAnswerSound();
+        }
+    }
+
     private void OnItemButtonClick(int buttonIndex, BurgerContent? patty, BurgerContent topping, BurgerContent sauce)
     {
         Vector3 offset = new Vector3(0, (_burgerContents.Count + 1) * offsetY, (_burgerContents.Count + 1) * -OffsetZ);
@@ -317,6 +329,8 @@ public class MakeBurger : MonoBehaviour
                     itemButtons[buttonIndex].interactable = false;
                 }
 
+                PlayItemButtonClickSound(customerOrderGenerator.CheckContentAdded((BurgerContent) patty));
+
                 break;
             case State.AddingTopping:
                 if (_burgerContents.Add(topping))
@@ -327,6 +341,8 @@ public class MakeBurger : MonoBehaviour
                     temp.transform.parent = _currentBurger.transform;
                     itemButtons[buttonIndex].interactable = false;
                 }
+
+                PlayItemButtonClickSound(customerOrderGenerator.CheckContentAdded(topping));
 
                 break;
             case State.AddingSauce:
@@ -342,6 +358,8 @@ public class MakeBurger : MonoBehaviour
                         button.interactable = false;
                     }
                 }
+
+                PlayItemButtonClickSound(customerOrderGenerator.CheckContentAdded(sauce));
 
                 break;
             default:
