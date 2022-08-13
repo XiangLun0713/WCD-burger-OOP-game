@@ -357,6 +357,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator GoBackToMainMenuCoroutine()
     {
+        StartCoroutine(DecreaseBackgroundMusicVolume());
         transitionAnimation.Play("Transition_In");
         yield return new WaitForSeconds(40.0f / 60);
         SceneManager.LoadScene("Scenes/Main Menu");
