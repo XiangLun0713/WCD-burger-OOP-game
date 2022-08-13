@@ -74,11 +74,14 @@ public class MainMenuManager : MonoBehaviour
 
     private IEnumerator DecreaseBackgroundMusicVolume()
     {
-        for (float i = 1; i >= 0; i -= 0.05f)
+        float initialVolume = backgroundMusic.volume;
+        for (float i = initialVolume; i >= 0; i -= initialVolume / 20)
         {
             backgroundMusic.volume = i;
             yield return new WaitForSeconds(.02f);
         }
+
+        backgroundMusic.volume = 0;
     }
 
     public void ChangeToEnglish()

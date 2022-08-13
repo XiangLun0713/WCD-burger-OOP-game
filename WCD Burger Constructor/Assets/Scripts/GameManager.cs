@@ -22,6 +22,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AudioSource winSound;
     [SerializeField] private AudioSource gameOverSound;
     [SerializeField] private AudioSource wrongAnswerSound;
+    [SerializeField] private AudioSource backgroundMusic;
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private TextMeshProUGUI doneText;
     [SerializeField] private TextMeshProUGUI customerOrderTitleText;
@@ -135,6 +136,11 @@ public class GameManager : MonoBehaviour
 
         transitionAnimation.Play("Transition_Out");
 
+        // play BGM
+        backgroundMusic.volume = 0.7f;
+        backgroundMusic.pitch = 1;
+        backgroundMusic.Play();
+
         // start the game
         _timerTime = GameDurationInSec;
         TargetForTheDay = InitialTargetForTheDayVal + (DayPassed * IncreaseInTargetValPerDay);
@@ -163,6 +169,7 @@ public class GameManager : MonoBehaviour
 
                 if (_timerTime <= 10)
                 {
+                    backgroundMusic.pitch = 1.2f;
                     if (!countDownSound.isPlaying) countDownSound.Play();
                 }
             }
@@ -180,7 +187,21 @@ public class GameManager : MonoBehaviour
     {
         IsGameOver = true;
         if (countDownSound.isPlaying) countDownSound.Stop();
+        StartCoroutine(DecreaseBackgroundMusicVolume());
         StartCoroutine(GameOverCoroutine());
+    }
+
+    private IEnumerator DecreaseBackgroundMusicVolume()
+    {
+        float initialVolume = backgroundMusic.volume;
+        for (float i = initialVolume; i >= 0; i -= initialVolume / 20)
+        {
+            backgroundMusic.volume = i;
+            yield return new WaitForSeconds(.05f);
+        }
+
+        backgroundMusic.volume = 0;
+        backgroundMusic.Stop();
     }
 
     private IEnumerator GameOverCoroutine()
