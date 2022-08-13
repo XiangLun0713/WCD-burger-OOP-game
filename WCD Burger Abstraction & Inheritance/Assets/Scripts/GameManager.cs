@@ -21,6 +21,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AudioSource whistleSound;
     [SerializeField] private AudioSource winSound;
     [SerializeField] private AudioSource gameOverSound;
+    [SerializeField] private AudioSource wrongAnswerSound;
+    [SerializeField] private AudioSource backgroundMusic;
     [SerializeField] private TextMeshProUGUI timerText;
     [SerializeField] private TextMeshProUGUI doneText;
     [SerializeField] private TextMeshProUGUI customerOrderTitleText;
@@ -35,13 +37,22 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI continueText;
     [SerializeField] private TextMeshProUGUI mainMenuText;
     [SerializeField] private TextMeshProUGUI newHighScoreText;
+    [SerializeField] private TextMeshProUGUI tutorialText;
+    [SerializeField] private TextMeshProUGUI tutorialTitleText;
+    [SerializeField] private TextMeshProUGUI tutorialContextText;
+    [SerializeField] private TextMeshProUGUI quitText;
+    [SerializeField] private TextMeshProUGUI yesText;
+    [SerializeField] private TextMeshProUGUI noText;
     [SerializeField] private Image targetLabel;
     [SerializeField] private Image moneyLabel;
     [SerializeField] private Image totalLabel;
     [SerializeField] private Image recipeBackgroundImage;
+    [SerializeField] private Image quitDialogueBox;
+    [SerializeField] private Image tutorialBox;
     [SerializeField] private Button continueButton;
     [SerializeField] private Button readyButton;
     [SerializeField] private Button mainMenuButton;
+    [SerializeField] private Button tutorialButton;
     [SerializeField] private Animator transitionAnimation;
     [SerializeField] private ParticleSystem confetti;
 
@@ -56,13 +67,21 @@ public class GameManager : MonoBehaviour
     private int TargetForTheDay { get; set; }
     private int TotalMoneyEarned { get; set; }
 
-    private const int GameDurationInSec = 150;
-    private const int InitialTargetForTheDayVal = 300;
-    private const int IncreaseInTargetValPerDay = 250;
     private float _timerTime;
+    private const int GameDurationInSec = 90;
+    private const int InitialTargetForTheDayVal = 300;
+    private const int IncreaseInTargetValPerDay = 100;
+
+    private const string EngTutorialContext =
+        "Welcome to WCD!\nThis game is a classic burger game where customers give order (in programming syntax), and you make the burger accordingly.\n\n<b>Make sure you've memorized the default value for the SuperBurger class variables!</b> If the customer order does not change the value of a particular class variable, the default value of that class variable applies.\n\nNote:\n1) You will be penalized for:\n    - missing any required burger content.\n    - adding a non-required burger content.\n2) You are not allow to remove burger content after you've added it.\n\nHave fun!";
+
+    private const string ChiTutorialContext =
+        "欢迎来到 WCD！\n这游戏是一款经典的汉堡游戏，不过食客会使用编程语法下单，然后您必须根据食客的订单来制作正確的汉堡。\n\n<b>请确保您已记住 SuperBurger 类变量的默认值！</b> 如果客户订单未更改特定类变量的值，您则需应用该类变量的默认值来制作汉堡。\n\n注：\n1) 您将受到处罚当您的漢堡：\n    - 缺少任何所需的汉堡馅料\n    - 添加非必需的汉堡馅料。\n2) 汉堡馅料添加后不可被删除。\n\n祝玩得愉快！";
 
     private void Start()
     {
+        Time.timeScale = 1f;
+
         transitionAnimation.Play("Transition_Out");
         PlayedOneTime = true;
 
@@ -70,16 +89,23 @@ public class GameManager : MonoBehaviour
         InGameLanguage = MainMenuManager.InGameLanguage;
 
         // set text language accordingly
-        doneText.text = (InGameLanguage == Language.Chinese) ? "完成" : "DONE";
+        doneText.text = (InGameLanguage == Language.Chinese) ? "完成" : "Done";
         customerOrderTitleText.text = (InGameLanguage == Language.Chinese) ? "顾客订单：" : "Customer's Order:";
+        tutorialText.text = (InGameLanguage == Language.Chinese) ? "教程" : "Tutorial";
+        tutorialTitleText.text = (InGameLanguage == Language.Chinese) ? "教程" : "Tutorial";
+        tutorialContextText.text = (InGameLanguage == Language.Chinese) ? ChiTutorialContext : EngTutorialContext;
         recipeTitleText.text = (InGameLanguage == Language.Chinese) ? "今日份菜谱" : "Recipe Of The Day";
         readyText.text = (InGameLanguage == Language.Chinese) ? "我准备好了" : "I'm Ready";
         continueText.text = (InGameLanguage == Language.Chinese) ? "继续" : "Continue";
         mainMenuText.text = (InGameLanguage == Language.Chinese) ? "返回主页" : "Main Menu";
         newHighScoreText.text = (InGameLanguage == Language.Chinese) ? "新纪录！" : "New Highscore!";
+        yesText.text = (InGameLanguage == Language.Chinese) ? "是" : "Yes";
+        noText.text = (InGameLanguage == Language.Chinese) ? "取消" : "No";
+        quitText.text = (InGameLanguage == Language.Chinese) ? "返回主頁?" : "Quit?";
 
         // show recipe
         customerOrderGenerator.CreateRecipeOfTheDay();
+        tutorialButton.gameObject.SetActive(true);
         recipeText.gameObject.SetActive(true);
         recipeTitleText.gameObject.SetActive(true);
         recipeBackgroundImage.gameObject.SetActive(true);
@@ -89,9 +115,6 @@ public class GameManager : MonoBehaviour
         TargetForTheDay = InitialTargetForTheDayVal;
         DayPassed = 0;
         TotalMoneyEarned = 0;
-
-        // hide target text if is story mode
-        if (MainMenuManager.IsStoryMode) targetText.gameObject.SetActive(false);
     }
 
     public void StartGame()
@@ -106,11 +129,17 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(40.0f / 60);
 
         // hide the recipe
+        tutorialButton.gameObject.SetActive(false);
         recipeText.gameObject.SetActive(false);
         recipeTitleText.gameObject.SetActive(false);
         recipeBackgroundImage.gameObject.SetActive(false);
 
         transitionAnimation.Play("Transition_Out");
+
+        // play BGM
+        backgroundMusic.volume = 0.7f;
+        backgroundMusic.pitch = 1;
+        backgroundMusic.Play();
 
         // start the game
         _timerTime = GameDurationInSec;
@@ -133,8 +162,14 @@ public class GameManager : MonoBehaviour
             if (_timerTime > 0)
             {
                 _timerTime -= Time.deltaTime;
+                if (MainMenuManager.IsStoryMode && MoneyEarned >= 300)
+                {
+                    GameOver();
+                }
+
                 if (_timerTime <= 10)
                 {
+                    backgroundMusic.pitch = 1.2f;
                     if (!countDownSound.isPlaying) countDownSound.Play();
                 }
             }
@@ -152,7 +187,21 @@ public class GameManager : MonoBehaviour
     {
         IsGameOver = true;
         if (countDownSound.isPlaying) countDownSound.Stop();
+        StartCoroutine(DecreaseBackgroundMusicVolume());
         StartCoroutine(GameOverCoroutine());
+    }
+
+    private IEnumerator DecreaseBackgroundMusicVolume()
+    {
+        float initialVolume = backgroundMusic.volume;
+        for (float i = initialVolume; i >= 0; i -= initialVolume / 20)
+        {
+            backgroundMusic.volume = i;
+            yield return new WaitForSeconds(.05f);
+        }
+
+        backgroundMusic.volume = 0;
+        backgroundMusic.Stop();
     }
 
     private IEnumerator GameOverCoroutine()
@@ -244,6 +293,7 @@ public class GameManager : MonoBehaviour
 
         // show recipe
         customerOrderGenerator.CreateRecipeOfTheDay();
+        tutorialButton.gameObject.SetActive(true);
         recipeText.gameObject.SetActive(true);
         recipeTitleText.gameObject.SetActive(true);
         recipeBackgroundImage.gameObject.SetActive(true);
@@ -292,6 +342,47 @@ public class GameManager : MonoBehaviour
     public void PlayPopSound()
     {
         popSound.Play();
+    }
+
+    public void PlayWrongAnswerSound()
+    {
+        wrongAnswerSound.Play();
+    }
+
+    public void GoBackToMainMenu()
+    {
+        Time.timeScale = 1;
+        StartCoroutine(GoBackToMainMenuCoroutine());
+    }
+
+    private IEnumerator GoBackToMainMenuCoroutine()
+    {
+        StartCoroutine(DecreaseBackgroundMusicVolume());
+        transitionAnimation.Play("Transition_In");
+        yield return new WaitForSeconds(40.0f / 60);
+        SceneManager.LoadScene("Scenes/Main Menu");
+    }
+
+    public void ShowQuitDialogueBox()
+    {
+        quitDialogueBox.gameObject.SetActive(true);
+        Time.timeScale = 0f;
+    }
+
+    public void HideQuitDialogueBox()
+    {
+        quitDialogueBox.gameObject.SetActive(false);
+        Time.timeScale = 1f;
+    }
+
+    public void ShowTutorialBox()
+    {
+        tutorialBox.gameObject.SetActive(true);
+    }
+
+    public void HideTutorialBox()
+    {
+        tutorialBox.gameObject.SetActive(false);
     }
 
     public void IncreaseMoneyEarned(int amount)

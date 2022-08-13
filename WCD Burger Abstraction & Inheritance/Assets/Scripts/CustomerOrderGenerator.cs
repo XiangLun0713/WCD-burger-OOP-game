@@ -42,6 +42,11 @@ public class CustomerOrderGenerator : MonoBehaviour
         return (correctCount * profitPerCorrect) - (((totalNumOfInputContents - correctCount) +
                                                      (totalNumOfCorrectContents - correctCount)) * penaltyPerWrong);
     }
+
+    public bool CheckContentAdded(MakeBurger.BurgerContent burgerContent)
+    {
+        return _answerSet.Contains(burgerContent);
+    }
 }
 
 abstract class Recipe
