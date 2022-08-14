@@ -51,9 +51,7 @@ public class MakeBurger : MonoBehaviour
     [SerializeField] private GameObject[] toppingPrefabs;
     [SerializeField] private GameObject[] saucePrefabs;
 
-
-    private const float AnimationFrameRate = 0.015f;
-    private const int NumberOfFrame = 20;
+    private const float TrayMovingTime = .35f;
     private const float OffsetZ = 0.01f;
     private GameObject _currentBurger;
     private State GameState { get; set; }
@@ -122,19 +120,22 @@ public class MakeBurger : MonoBehaviour
             }
 
             Transform burgerTransform = _currentBurger.GetComponent<Transform>();
-            if (burgerTransform != null)
+            Vector3 currPos = burgerTransform.position;
+            Vector3 dest = currPos + (direction * moveDist);
+
+            float elapsedTime = 0;
+            while (elapsedTime < TrayMovingTime)
             {
-                for (int i = 0; i < NumberOfFrame; i++)
-                {
-                    burgerTransform.Translate((direction * moveDist * 1.0f) / NumberOfFrame);
-                    yield return new WaitForSeconds(AnimationFrameRate);
-                }
+                burgerTransform.position = Vector3.Lerp(currPos, dest, (elapsedTime / TrayMovingTime));
+                elapsedTime += Time.deltaTime;
+                yield return new WaitForEndOfFrame();
             }
 
             if (direction == Vector3.left) MoveToPrevState();
             else MoveToNextState();
 
             IsMoving = false;
+            burgerTransform.position = dest;
             UpdateMachineOption();
         }
     }
@@ -427,23 +428,28 @@ public class MakeBurger : MonoBehaviour
     {
         // save reference of the current burger
         GameObject temp = _currentBurger;
+
         // add burger top bun
         Vector3 offset = new Vector3(0, (_burgerContents.Count + 1) * offsetY, (_burgerContents.Count + 1) * -OffsetZ);
         Instantiate(topBunPrefab,
             _currentBurger.transform.position + offset,
             _currentBurger.transform.rotation).transform.parent = _currentBurger.transform;
+
         // clear burger content
         _burgerContents.Clear();
+
         // move the burger
         Transform burgerTransform = temp.GetComponent<Transform>();
-        if (burgerTransform != null)
+        Vector3 currPos = burgerTransform.position;
+        Vector3 dest = currPos + (Vector3.right * moveDist);
+        float elapsedTime = 0;
+        while (elapsedTime < TrayMovingTime)
         {
-            for (int i = 0; i < NumberOfFrame; i++)
-            {
-                burgerTransform.Translate((Vector3.right * moveDist * 1.0f) / NumberOfFrame);
-                yield return new WaitForSeconds(AnimationFrameRate);
-            }
+            burgerTransform.position = Vector3.Lerp(currPos, dest, (elapsedTime / TrayMovingTime));
+            elapsedTime += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
         }
+        burgerTransform.position = dest;
 
         // destroy the current burger
         Destroy(temp);
