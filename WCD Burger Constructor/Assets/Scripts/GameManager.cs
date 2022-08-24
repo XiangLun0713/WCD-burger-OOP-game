@@ -43,6 +43,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI quitText;
     [SerializeField] private TextMeshProUGUI yesText;
     [SerializeField] private TextMeshProUGUI noText;
+    [SerializeField] private TextMeshProUGUI nextText;
     [SerializeField] private Image targetLabel;
     [SerializeField] private Image moneyLabel;
     [SerializeField] private Image totalLabel;
@@ -53,6 +54,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Button readyButton;
     [SerializeField] private Button mainMenuButton;
     [SerializeField] private Button tutorialButton;
+    [SerializeField] private Button tutorialNextButton;
+    [SerializeField] private Button tutorialCloseButton;
     [SerializeField] private Animator transitionAnimation;
     [SerializeField] private ParticleSystem confetti;
 
@@ -73,10 +76,16 @@ public class GameManager : MonoBehaviour
     private const int IncreaseInTargetValPerDay = 100;
 
     private const string EngTutorialContext =
-        "Welcome to WCD!\nThis game is a classic burger game where customers give order (in programming syntax), and you make the burger accordingly.\n\n<b>Make sure you've memorized the default value for the Burger class variables!</b> If the customer order does not change the value of a particular class variable, the default value of that class variable applies.\n\nNote:\n1) You will be penalized for:\n    - missing any required burger content.\n    - adding a non-required burger content.\n2) You are not allow to remove burger content after you've added it.\n\nHave fun!";
+        "Welcome to WCD!\nThis is a classic burger game where customers give orders (in programming syntax), and you make the burger accordingly.\n\nNote:\n1) You will be penalized for:\n    - missing any required burger content.\n    - adding a non-required burger content.\n2) You are not allowed to remove burger content after you've added it.\n\n<b>Make sure you've memorized the default value for the Burger class variables!</b> You should make your burger according to the <b>final value</b> for the patties, toppings and sauce variable.";
+
+    private const string EngSecondTutorialContext =
+        "For example, if the default values of the Burger class variable in the recipe are:\n\npatties = {\"Fish\", \"Chicken\"};\ntoppings = {\"Cucumber\", \"Lettuce\", \"Cheese\"};\nsauce = \"Mayo\";\n\nAnd the given customer's order is:\n\nBurger burger = new Burger();\nburger.setToppings(new String[] {\"Cheese\"});\nburger.setSauce(\"BBQ\");\n\nThe correct answer will be:\n\npatties = {\"Fish\", \"Chicken\"}    // default\ntoppings = {\"Cheese\"}            // overwrite\nsauce = \"BBQ\"                      // overwrite";
 
     private const string ChiTutorialContext =
-        "欢迎来到 WCD！\n这游戏是一款经典的汉堡游戏，不过食客会使用编程语法下单，然后您必须根据食客的订单来制作正確的汉堡。\n\n<b>请确保您已记住 Burger 类变量的默认值！</b> 如果客户订单未更改特定类变量的值，您则需应用该类变量的默认值来制作汉堡。\n\n注：\n1) 您将受到处罚当您的漢堡：\n    - 缺少任何所需的汉堡馅料\n    - 添加非必需的汉堡馅料。\n2) 汉堡馅料添加后不可被删除。\n\n祝玩得愉快！";
+        "欢迎来到 WCD！\n这游戏是一款经典的汉堡游戏，不过食客会使用编程语法下单，然后您必须根据食客的订单来制作正確的汉堡。\n\n注：\n1) 您将受到处罚当您的漢堡：\n    - 缺少任何所需的汉堡馅料\n    - 添加非必需的汉堡馅料。\n2) 汉堡馅料添加后不可被删除。\n\n<b>请确保您已记住 Burger 类变量的默认值！</b> 您需根据patties， toppings和sauce类变量的最终值来制作汉堡。";
+
+    private const string ChiSecondTutorialContext =
+        "举个例子，如果 Burger 类变量的默认值为：\n\npatties = {\"Fish\", \"Chicken\"};\ntoppings = {\"Cucumber\", \"Lettuce\", \"Cheese\"};\nsauce = \"Mayo\";\n\n以及顾客的订单为：\n\nBurger burger = new Burger();\nburger.setToppings(new String[] {\"Cheese\"});\nburger.setSauce(\"BBQ\");\n\n那么正解将会是：\n\npatties = {\"Fish\", \"Chicken\"}    // 默認值\ntoppings = {\"Cheese\"}\nsauce = \"BBQ\"";
 
     private void Start()
     {
@@ -102,6 +111,7 @@ public class GameManager : MonoBehaviour
         yesText.text = (InGameLanguage == Language.Chinese) ? "是" : "Yes";
         noText.text = (InGameLanguage == Language.Chinese) ? "取消" : "No";
         quitText.text = (InGameLanguage == Language.Chinese) ? "返回主頁?" : "Quit?";
+        nextText.text = (InGameLanguage == Language.Chinese) ? "下一頁 》" : "Next >>";
 
         // show recipe
         customerOrderGenerator.CreateRecipeOfTheDay();
@@ -115,6 +125,9 @@ public class GameManager : MonoBehaviour
         TargetForTheDay = InitialTargetForTheDayVal;
         DayPassed = 0;
         TotalMoneyEarned = 0;
+
+        // hide target text if is story mode
+        if (MainMenuManager.IsStoryMode) targetText.gameObject.SetActive(false);
     }
 
     public void StartGame()
@@ -162,10 +175,6 @@ public class GameManager : MonoBehaviour
             if (_timerTime > 0)
             {
                 _timerTime -= Time.deltaTime;
-                if (MainMenuManager.IsStoryMode && MoneyEarned >= 300)
-                {
-                    GameOver();
-                }
 
                 if (_timerTime <= 10)
                 {
@@ -270,6 +279,15 @@ public class GameManager : MonoBehaviour
                 gameOverSound.Play();
             }
         }
+    }
+
+    public void OnTutorialNextButtonPressed()
+    {
+        tutorialNextButton.gameObject.SetActive(false);
+        tutorialCloseButton.gameObject.SetActive(true);
+
+        tutorialContextText.text =
+            (InGameLanguage == Language.Chinese) ? ChiSecondTutorialContext : EngSecondTutorialContext;
     }
 
     public void OnContinueButtonPressed()
@@ -378,11 +396,14 @@ public class GameManager : MonoBehaviour
     public void ShowTutorialBox()
     {
         tutorialBox.gameObject.SetActive(true);
+        tutorialNextButton.gameObject.SetActive(true);
+        tutorialCloseButton.gameObject.SetActive(false);
     }
 
     public void HideTutorialBox()
     {
         tutorialBox.gameObject.SetActive(false);
+        tutorialContextText.text = (InGameLanguage == Language.Chinese) ? ChiTutorialContext : EngTutorialContext;
     }
 
     public void IncreaseMoneyEarned(int amount)
