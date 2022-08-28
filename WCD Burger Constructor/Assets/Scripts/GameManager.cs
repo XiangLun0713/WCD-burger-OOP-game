@@ -251,11 +251,15 @@ public class GameManager : MonoBehaviour
                 ? $"Total Profit: ${TotalMoneyEarned}"
                 : $"总收入：${TotalMoneyEarned}";
 
+            // update highscore record in PlayerPrefs
             if (TotalMoneyEarned > PlayerPrefs.GetInt("highscore"))
             {
                 newHighScoreText.gameObject.SetActive(true);
                 PlayerPrefs.SetInt("highscore", TotalMoneyEarned);
             }
+
+            // update highscore in database
+            FirebaseUtils.UpdateUserHighScore(TotalMoneyEarned);
 
             if (MoneyEarned >= TargetForTheDay)
             {
@@ -395,6 +399,7 @@ public class GameManager : MonoBehaviour
 
     public void ShowTutorialBox()
     {
+        tutorialButton.interactable = false;
         tutorialBox.gameObject.SetActive(true);
         tutorialNextButton.gameObject.SetActive(true);
         tutorialCloseButton.gameObject.SetActive(false);
@@ -402,6 +407,7 @@ public class GameManager : MonoBehaviour
 
     public void HideTutorialBox()
     {
+        tutorialButton.interactable = true;
         tutorialBox.gameObject.SetActive(false);
         tutorialContextText.text = (InGameLanguage == Language.Chinese) ? ChiTutorialContext : EngTutorialContext;
     }
