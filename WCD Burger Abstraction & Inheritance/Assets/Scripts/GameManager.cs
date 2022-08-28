@@ -72,8 +72,8 @@ public class GameManager : MonoBehaviour
 
     private float _timerTime;
     private const int GameDurationInSec = 90;
-    private const int InitialTargetForTheDayVal = 300;
-    private const int IncreaseInTargetValPerDay = 100;
+    private const int InitialTargetForTheDayVal = 400;
+    private const int IncreaseInTargetValPerDay = 200;
 
     private const string EngTutorialContext =
         "Welcome to WCD!\nThis is a classic burger game where customers give orders (in programming syntax), and you make the burger accordingly.\n\nNote:\n1) You will be penalized for:\n    - missing any required burger content.\n    - adding a non-required burger content.\n2) You are not allowed to remove burger content after you've added it.\n\n<b>Make sure you've memorized the default value for the SuperBurger class variables!</b> You should make your burger according to the <b>final value</b> for the patties, toppings and sauce variable.";
@@ -251,11 +251,15 @@ public class GameManager : MonoBehaviour
                 ? $"Total Profit: ${TotalMoneyEarned}"
                 : $"总收入：${TotalMoneyEarned}";
 
+            // update highscore record in PlayerPrefs
             if (TotalMoneyEarned > PlayerPrefs.GetInt("highscore"))
             {
                 newHighScoreText.gameObject.SetActive(true);
                 PlayerPrefs.SetInt("highscore", TotalMoneyEarned);
             }
+
+            // update highscore in database
+            FirebaseUtils.UpdateUserHighScore(TotalMoneyEarned);
 
             if (MoneyEarned >= TargetForTheDay)
             {
@@ -395,6 +399,7 @@ public class GameManager : MonoBehaviour
 
     public void ShowTutorialBox()
     {
+        tutorialButton.interactable = false;
         tutorialBox.gameObject.SetActive(true);
         tutorialNextButton.gameObject.SetActive(true);
         tutorialCloseButton.gameObject.SetActive(false);
@@ -402,6 +407,7 @@ public class GameManager : MonoBehaviour
 
     public void HideTutorialBox()
     {
+        tutorialButton.interactable = true;
         tutorialBox.gameObject.SetActive(false);
         tutorialContextText.text = (InGameLanguage == Language.Chinese) ? ChiTutorialContext : EngTutorialContext;
     }

@@ -72,8 +72,8 @@ public class GameManager : MonoBehaviour
 
     private float _timerTime;
     private const int GameDurationInSec = 90;
-    private const int InitialTargetForTheDayVal = 300;
-    private const int IncreaseInTargetValPerDay = 100;
+    private const int InitialTargetForTheDayVal = 400;
+    private const int IncreaseInTargetValPerDay = 200;
 
     private const string EngTutorialContext =
         "Welcome to WCD!\nThis is a classic burger game where customers give orders (in programming syntax), and you make the burger accordingly.\n\nNote:\n1) You will be penalized for:\n    - missing any required burger content.\n    - adding a non-required burger content.\n2) You are not allowed to remove burger content after you've added it.\n\n<b>Make sure you've memorized the default value for the Burger class variables!</b> You should make your burger according to the <b>final value</b> for the patties, toppings and sauce variable.";
