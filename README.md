@@ -5,7 +5,7 @@
 The WCD Burger is a classic burger game that we all are familiar with, but with an interesting twist. In WCD Burger, customers give orders in Java programming syntax, and the players are required to make the correct burger accordingly. The game consists of the story mode as well as the endless mode where the common goal for both modes is to earn as much gold as possible, to keep the restaurant running. The game also consists of a leaderboard to introduce competitiveness into the game. The first series of the WCD Burger introduces the players to class creation using various types of constructors, whereas the second series of the WCD Burger (WCD Burger 2.0) introduces the players to Inheritance and Abstraction concepts.
 
 ## Showcase website
-The game is originally accessible through the Apptitude Challenge official website. However, since the challenge is now over, I've created a separate [**showcase website**](https://xianglun.me/WCD-burger-OOP-game/) to let every one of you try out this minigame. Have fun! 
+The game is originally accessible through the Apptitude Challenge official website. However, since the challenge is now over, I've created a separate [**showcase website**](https://xianglun0713.github.io/WCD-burger-OOP-game/) to let every one of you try out this minigame. Have fun! 
 
 \*\*_Note that only the first series of the minigame is accessible at this stage._
 
