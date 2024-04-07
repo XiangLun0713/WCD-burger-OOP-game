@@ -15,7 +15,7 @@ const updatePlayerScoreInDatabase = async (username, highscore) => {
     // Create a document with username from local storage, and instantiate the username and score fields
     await setDoc(currentPlayerDocRef, {
       score: highscore,
-      username: username,
+      name: username,
     });
   }
 };
